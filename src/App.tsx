@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { AdminAuthProvider } from './contexts/AdminAuthContext';
+import { CartProvider } from './contexts/CartContext';
+import { WishlistProvider } from './contexts/WishlistContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import AdminDashboard from './pages/AdminDashboard';
 import Header from './components/Header';
@@ -11,12 +13,16 @@ import WhatsAppCTA from './components/WhatsAppCTA';
 import Newsletter from './components/Newsletter';
 import Footer from './components/Footer';
 import WhatsAppFloating from './components/WhatsAppFloating';
+import CartDrawer from './components/CartDrawer';
+import WishlistDrawer from './components/WishlistDrawer';
 
 function App() {
   const [currentCategory, setCurrentCategory] = useState<string>('all');
   const [showHero, setShowHero] = useState(true);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [showAdmin, setShowAdmin] = useState(false);
+  const [isCartOpen, setIsCartOpen] = useState(false);
+  const [isWishlistOpen, setIsWishlistOpen] = useState(false);
 
   const handleCategoryChange = (category: string) => {
     setCurrentCategory(category);
@@ -47,33 +53,42 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Header
-        onCategoryChange={handleCategoryChange}
-        currentCategory={currentCategory}
-        onSearch={handleSearch}
-      />
+    <CartProvider>
+      <WishlistProvider>
+        <div className="min-h-screen bg-gray-50">
+          <Header
+            onCategoryChange={handleCategoryChange}
+            currentCategory={currentCategory}
+            onSearch={handleSearch}
+            onCartClick={() => setIsCartOpen(true)}
+            onWishlistClick={() => setIsWishlistOpen(true)}
+          />
 
-      {showHero && (
-        <>
-          <Hero onShopClick={handleCategoryChange} />
-          <FeaturedCollections onCollectionClick={handleCategoryChange} />
-          <BrandStory />
-        </>
-      )}
+          {showHero && (
+            <>
+              <Hero onShopClick={handleCategoryChange} />
+              <FeaturedCollections onCollectionClick={handleCategoryChange} />
+              <BrandStory />
+            </>
+          )}
 
-      <ProductGrid category={currentCategory} searchQuery={searchQuery} />
+          <ProductGrid category={currentCategory} searchQuery={searchQuery} />
 
-      {showHero && (
-        <>
-          <WhatsAppCTA />
-          <Newsletter />
-        </>
-      )}
+          {showHero && (
+            <>
+              <WhatsAppCTA />
+              <Newsletter />
+            </>
+          )}
 
-      <Footer />
-      <WhatsAppFloating />
-    </div>
+          <Footer />
+          <WhatsAppFloating />
+
+          <CartDrawer isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
+          <WishlistDrawer isOpen={isWishlistOpen} onClose={() => setIsWishlistOpen(false)} />
+        </div>
+      </WishlistProvider>
+    </CartProvider>
   );
 }
 

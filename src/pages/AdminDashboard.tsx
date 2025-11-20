@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { useAdminAuth } from '../contexts/AdminAuthContext';
-import { LogOut, Package, ShoppingBag } from 'lucide-react';
+import { LogOut, Package, ShoppingBag, ShoppingCart } from 'lucide-react';
 import ProductManagement from '../components/admin/ProductManagement';
+import OrderManagement from '../components/admin/OrderManagement';
 
 export default function AdminDashboard() {
   const { signOut, user } = useAdminAuth();
-  const [activeTab, setActiveTab] = useState<'products'>('products');
+  const [activeTab, setActiveTab] = useState<'products' | 'orders'>('products');
 
   const handleSignOut = async () => {
     try {
@@ -53,11 +54,23 @@ export default function AdminDashboard() {
                 <Package className="w-5 h-5" />
                 <span className="font-medium">Products</span>
               </button>
+              <button
+                onClick={() => setActiveTab('orders')}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+                  activeTab === 'orders'
+                    ? 'bg-black text-white'
+                    : 'text-gray-700 hover:bg-gray-100'
+                }`}
+              >
+                <ShoppingCart className="w-5 h-5" />
+                <span className="font-medium">Orders</span>
+              </button>
             </nav>
           </aside>
 
           <main className="flex-1">
             {activeTab === 'products' && <ProductManagement />}
+            {activeTab === 'orders' && <OrderManagement />}
           </main>
         </div>
       </div>

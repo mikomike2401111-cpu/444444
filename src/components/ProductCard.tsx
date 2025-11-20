@@ -1,6 +1,9 @@
 import { useState } from 'react';
+import { ShoppingBag, Heart } from 'lucide-react';
 import { Product } from '../lib/supabase';
 import { generateWhatsAppLink } from '../lib/whatsapp';
+import { useCart } from '../contexts/CartContext';
+import { useWishlist } from '../contexts/WishlistContext';
 
 interface ProductCardProps {
   product: Product;
@@ -10,6 +13,26 @@ export default function ProductCard({ product }: ProductCardProps) {
   const [selectedSize, setSelectedSize] = useState<string>(product.sizes[0] || '');
   const [selectedColor, setSelectedColor] = useState<string>(product.colors[0] || '');
   const [isHovering, setIsHovering] = useState(false);
+  const { addToCart } = useCart();
+  const { toggleWishlist, isInWishlist } = useWishlist();
+
+  const handleAddToCart = async () => {
+    try {
+      await addToCart(product, 1, selectedSize, selectedColor);
+      alert('Added to cart!');
+    } catch (error) {
+      alert('Failed to add to cart');
+    }
+  };
+
+  const handleWishlist = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    try {
+      await toggleWishlist(product);
+    } catch (error) {
+      console.error('Failed to update wishlist');
+    }
+  };
 
   const handleOrder = () => {
     const whatsappLink = generateWhatsAppLink(
@@ -40,6 +63,19 @@ export default function ProductCard({ product }: ProductCardProps) {
             <span className="text-6xl">👕</span>
           </div>
         )}
+
+        <button
+          onClick={handleWishlist}
+          className="absolute top-3 right-3 p-2 bg-white rounded-full shadow-lg hover:scale-110 transition-transform"
+        >
+          <Heart
+            className={`w-5 h-5 ${
+              isInWishlist(product.id)
+                ? 'fill-red-500 text-red-500'
+                : 'text-gray-700'
+            }`}
+          />
+        </button>
 
         {isHovering && (
           <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent animate-fade-in flex flex-col justify-end p-4">
@@ -119,13 +155,23 @@ export default function ProductCard({ product }: ProductCardProps) {
           </div>
         )}
 
-        <button
-          onClick={handleOrder}
-          disabled={!product.in_stock}
-          className="w-full py-3 bg-black text-white font-medium hover:bg-gray-800 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed mt-4"
-        >
-          {product.in_stock ? 'Order via WhatsApp' : 'Out of Stock'}
-        </button>
+        <div className="grid grid-cols-2 gap-2 mt-4">
+          <button
+            onClick={handleAddToCart}
+            disabled={!product.in_stock}
+            className="py-3 bg-black text-white font-medium hover:bg-gray-800 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed rounded flex items-center justify-center gap-2"
+          >
+            <ShoppingBag className="w-4 h-4" />
+            Add to Cart
+          </button>
+          <button
+            onClick={handleOrder}
+            disabled={!product.in_stock}
+            className="py-3 bg-green-500 text-white font-medium hover:bg-green-600 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed rounded"
+          >
+            WhatsApp
+          </button>
+        </div>
       </div>
     </div>
   );

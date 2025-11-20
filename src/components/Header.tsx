@@ -1,16 +1,22 @@
-import { Search, Heart, X } from 'lucide-react';
+import { Search, Heart, X, ShoppingBag } from 'lucide-react';
 import { useState } from 'react';
+import { useCart } from '../contexts/CartContext';
+import { useWishlist } from '../contexts/WishlistContext';
 
 interface HeaderProps {
   onCategoryChange: (category: string) => void;
   currentCategory: string;
   onSearch: (query: string) => void;
+  onCartClick: () => void;
+  onWishlistClick: () => void;
 }
 
-export default function Header({ onCategoryChange, currentCategory, onSearch }: HeaderProps) {
+export default function Header({ onCategoryChange, currentCategory, onSearch, onCartClick, onWishlistClick }: HeaderProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const { totalItems } = useCart();
+  const { items: wishlistItems } = useWishlist();
 
   const categories = [
     { name: 'Home', value: 'all' },
@@ -65,15 +71,34 @@ export default function Header({ onCategoryChange, currentCategory, onSearch }: 
             ))}
           </nav>
 
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2">
             <button
               onClick={() => setIsSearchOpen(!isSearchOpen)}
               className="p-2 hover:bg-gray-50 rounded-full transition-colors"
             >
               <Search className="w-5 h-5 text-gray-700" />
             </button>
-            <button className="p-2 hover:bg-gray-50 rounded-full transition-colors">
+            <button
+              onClick={onWishlistClick}
+              className="p-2 hover:bg-gray-50 rounded-full transition-colors relative"
+            >
               <Heart className="w-5 h-5 text-gray-700" />
+              {wishlistItems.length > 0 && (
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-medium">
+                  {wishlistItems.length}
+                </span>
+              )}
+            </button>
+            <button
+              onClick={onCartClick}
+              className="p-2 hover:bg-gray-50 rounded-full transition-colors relative"
+            >
+              <ShoppingBag className="w-5 h-5 text-gray-700" />
+              {totalItems > 0 && (
+                <span className="absolute -top-1 -right-1 bg-black text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-medium">
+                  {totalItems}
+                </span>
+              )}
             </button>
           </div>
         </div>
